@@ -10,21 +10,22 @@ func main() {
 	fmt.Println("Leaderboard app")
 
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
-	panicOnError(err)
-
-	defer conn.Close()
-	fmt.Println("Successfully connected to Rabbit MQ!!")
-	ch, err := conn.Channel()
-	panicOnError(err)
-	message := "Hello RMQ!"
-	publishToRmq(ch, message)
-}
-
-func panicOnError(err error) {
 	if err != nil {
 		fmt.Println(err)
 		panic(err)
 	}
+
+	defer conn.Close()
+	fmt.Println("Successfully connected to Rabbit MQ!!")
+	ch, err := conn.Channel()
+
+	if err != nil {
+		fmt.Println(err)
+		panic(err)
+	}
+
+	message := "Hello RMQ!"
+	publishToRmq(ch, message)
 }
 
 func publishToRmq(ch *amqp.Channel, message string) bool {
@@ -36,7 +37,10 @@ func publishToRmq(ch *amqp.Channel, message string) bool {
 		false,
 		nil,
 	)
-	panicOnError(err)
+	if err != nil {
+		fmt.Println(err)
+		panic(err)
+	}
 
 	fmt.Println(queue)
 	err = ch.Publish(
