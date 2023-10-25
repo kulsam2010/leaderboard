@@ -1,64 +1,38 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/streadway/amqp"
+	"github.com/go-redis/redis/v8"
 )
 
-func main() {
-	fmt.Println("Leaderboard app")
+func ProcessMessage(ctx context.Context, rdb *redis.Client, msg Message) {
+	leaderboardKey := "leaderboard"
 
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
-	if err != nil {
-		fmt.Println(err)
-		panic(err)
+	score, err := UserScore(ctx, rdb, leaderboardKey, msg.UserName)
+
+	if err == redis.Nil {
+		fmt.Printf("Adding member %s to the leaderboard.\n", msg.UserName)
+	} else if err != nil {
+		fmt.Printf("Error fetching member value: %v\n", err)
+		return
+	} else {
+		fmt.Printf("Prev. Score of Member %s: %f\n", msg.UserName, score)
 	}
 
-	defer conn.Close()
-	fmt.Println("Successfully connected to Rabbit MQ!!")
-	ch, err := conn.Channel()
+	score = score + float64(msg.Points)
+
+	err = rdb.ZAdd(ctx, leaderboardKey, &redis.Z{
+		Score:  score,
+		Member: msg.UserName,
+	}).Err()
 
 	if err != nil {
-		fmt.Println(err)
-		panic(err)
+		fmt.Println("Error Adding score ", err)
 	}
 
-	message := "Hello RMQ!"
-	publishToRmq(ch, message)
-}
-
-func publishToRmq(ch *amqp.Channel, message string) bool {
-	queue, err := ch.QueueDeclare(
-		"TestQueue",
-		false,
-		false,
-		false,
-		false,
-		nil,
-	)
-	if err != nil {
-		fmt.Println(err)
-		panic(err)
-	}
-
-	fmt.Println(queue)
-	err = ch.Publish(
-		"",
-		"TestQueue",
-		false,
-		false,
-		amqp.Publishing{
-			ContentType: "text/plain",
-			Body:        []byte(message),
-		},
-	)
-
-	if err != nil {
-		fmt.Println(err)
-		return false
-	}
-
-	fmt.Println("Successfully published the message to RMQ")
-	return true
+	score, _ = UserScore(ctx, rdb, leaderboardKey, msg.UserName)
+	rank, _ := UserRank(ctx, rdb, leaderboardKey, msg.UserName)
+	fmt.Printf("Score of member %s is %f and rank is %d \n", msg.UserName, score, rank)
 }
