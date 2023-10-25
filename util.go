@@ -36,6 +36,10 @@ func UserScore(ctx context.Context, rdb *redis.Client, key string, member string
 	return rdb.ZScore(ctx, key, member).Result()
 }
 
+func UpdateScore(ctx context.Context, rdb *redis.Client, key string, member string, points int64) float64 {
+	return rdb.ZIncrBy(ctx, key, float64(points), member).Val()
+}
+
 func UserRank(ctx context.Context, rdb *redis.Client, key string, member string) (int64, error) {
 	rank, err := rdb.ZRevRank(ctx, key, member).Result()
 	return rank + 1, err
