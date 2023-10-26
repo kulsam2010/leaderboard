@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
+	"github.com/spf13/viper"
 )
 
 type Message struct {
@@ -14,6 +16,11 @@ type Message struct {
 
 func main() {
 	fmt.Println("Consumer app")
+	viper.SetConfigFile("config.yaml")
+	if err := viper.ReadInConfig(); err != nil {
+		fmt.Println("Failed to read configuration:", err)
+		return
+	}
 
 	rdb := NewRedisClient()
 	ctx := context.Background()
@@ -68,5 +75,6 @@ func main() {
 
 	fmt.Println("Successfully connected to Rabbit MQ!!")
 	fmt.Println("[@] - waiting for messages")
+
 	<-forever
 }

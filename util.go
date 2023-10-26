@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/go-redis/redis/v8"
+	"github.com/spf13/viper"
 	"github.com/streadway/amqp"
 )
 
@@ -20,10 +22,16 @@ func Deserialize(b []byte) (Message, error) {
 }
 
 func NewRedisClient() *redis.Client {
+	host := viper.GetString("redis.host")
+	port := viper.GetInt("redis.port")
+	pwd := viper.GetString("redis.password")
+	db := viper.GetInt("redis.db")
+
+	addr := fmt.Sprintf("%s:%d", host, port)
 	return redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       0,
+		Addr:     addr,
+		Password: pwd,
+		DB:       db,
 	})
 }
 
