@@ -10,9 +10,12 @@ docker run -d --name rabbitmq-container -p 5672:5672 -p 15672:15672 rabbitmq:3-m
 
 This command creates a Docker container named "rabbitmq-container" based on the "rabbitmq:3-management" image. The -p flag maps the RabbitMQ ports 5672 (AMQP) and 15672 (RabbitMQ management UI) to your host machine.
 
-Start - docker start rabbitmq-container
-Stop - docker stop rabbitmq-container
-Remove - docker rm rabbitmq-container
+Start
+	docker start rabbitmq-container
+Stop
+	docker stop rabbitmq-container
+Remove
+	docker rm rabbitmq-container
 
 
 You can access the RabbitMQ Management UI by opening a web browser and navigating to http://localhost:15672/. 
