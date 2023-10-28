@@ -1,8 +1,8 @@
 rabbitmq:
-    docker start rabbitmq-container
+	docker start rabbitmq-container
 
 redis:
-    docker start redis-container
+	docker start redis-container
 
 postgres:
 	docker run --name pg16 -e POSTGRES_USER=root  -e POSTGRES_PASSWORD=devs -p:5432:5432 -d postgres:16-alpine
@@ -19,4 +19,8 @@ migrateup:
 migratedown:
 	migrate -path db/migration -database "postgresql://root:devs@localhost:5432/leaderboard?sslmode=disable" -verbose down
 
-.PHONY: rabbitmq redis postgres createdb dropdb migrateup migratedown
+sqlc:
+	sqlc generate
+
+.PHONY: rabbitmq redis postgres createdb dropdb migrateup migratedown sqlc
+
