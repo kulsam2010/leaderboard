@@ -69,7 +69,9 @@ go build
 go run *.go
 
 Go to RabbitMQ management UI, go to leaderboard queue and publish a message.
+
 Sample - {"user_name": "Abhi", "user_id": 1, "points":201}
+
 Voila!
 
 
