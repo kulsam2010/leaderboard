@@ -9,6 +9,7 @@ CREATE TABLE "scores" (
   "id" bigserial PRIMARY KEY,
   "user_id" integer NOT NULL,
   "activity_id" integer NOT NULL,
+  "score" integer NOT NULL,
   "created_at" timestamp NOT NULL DEFAULT (now()),
   "updated_at" timestamp NOT NULL DEFAULT (now())
 );

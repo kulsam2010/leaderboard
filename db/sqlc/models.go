@@ -19,6 +19,7 @@ type Score struct {
 	ID         int64     `json:"id"`
 	UserID     int32     `json:"user_id"`
 	ActivityID int32     `json:"activity_id"`
+	Score      int32     `json:"score"`
 	CreatedAt  time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at"`
 }
