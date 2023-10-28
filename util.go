@@ -35,8 +35,46 @@ func NewRedisClient() *redis.Client {
 	})
 }
 
+func setupRabbitMQChannel(conn *amqp.Connection) (*amqp.Channel, error) {
+
+	ch, err := conn.Channel()
+	if err != nil {
+		fmt.Println("Error while creating channel")
+		fmt.Println(err)
+		return nil, err
+	}
+
+	queueName := viper.GetString("rabbitmq.queue_name")
+
+	fmt.Println("Queue does not exist. Creating new queue")
+	queue, e := ch.QueueDeclare(
+		queueName,
+		false,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if e != nil {
+		fmt.Println("Error while creating new queue")
+		fmt.Println(err)
+		return nil, err
+	}
+	fmt.Println(queue)
+	return ch, nil
+}
+
 func NewRabbitMQConn() (conn *amqp.Connection, err error) {
-	return amqp.Dial("amqp://leaderboardapp:leaderboardpwd@localhost:5672/")
+	host := viper.GetString("rabbitmq.host")
+	port := viper.GetInt("rabbitmq.port")
+	username := viper.GetString("rabbitmq.username")
+	pwd := viper.GetString("rabbitmq.pwd")
+	addr := fmt.Sprintf("amqp://%s:%s@%s:%d/", username, pwd, host, port)
+	if addr != "amqp://guest:guest@localhost:5672/" {
+		fmt.Println(addr)
+		panic("The connections string is incorrect")
+	}
+	return amqp.Dial(addr)
 
 }
 

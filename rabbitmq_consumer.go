@@ -19,30 +19,28 @@ func main() {
 	viper.SetConfigFile("config.yaml")
 	if err := viper.ReadInConfig(); err != nil {
 		fmt.Println("Failed to read configuration:", err)
-		return
+		panic(err)
 	}
 
 	rdb := NewRedisClient()
 	ctx := context.Background()
 
-	conn, err := NewRabbitMQConn()
-	if err != nil {
-		fmt.Println(err)
-		panic(err)
+	conn, e := NewRabbitMQConn()
+	if e != nil {
+		fmt.Printf("Error while setting up rabbitMQ %v", e)
+		panic(e)
 	}
-
 	defer conn.Close()
+	ch, err := setupRabbitMQChannel(conn)
 
-	ch, err := conn.Channel()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("Error while setting up rabbitMQ Channel %v", err)
 		panic(err)
 	}
-
 	defer ch.Close()
 
 	msgs, err := ch.Consume(
-		"TestQueue",
+		viper.GetString("rabbitmq.queue_name"),
 		"",
 		true,
 		false,
@@ -75,6 +73,5 @@ func main() {
 
 	fmt.Println("Successfully connected to Rabbit MQ!!")
 	fmt.Println("[@] - waiting for messages")
-
 	<-forever
 }
